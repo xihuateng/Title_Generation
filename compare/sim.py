@@ -35,18 +35,36 @@ def cos_sim(vector_a, vector_b):
 
 bc = BertClient()
 cnt = 0
-title_vec = []
+title_v = []
 for line in open(title_extract_w2v_path,"r",encoding="utf-8"):
     a = bc.encode([line.rstrip('\n')])
-    title_vec.append(a)
+    title_v.append(a)
     cnt += 1
     if cnt % 100 == 0:
         print(cnt)
     
-title_gen_vec = np.array(title_vec)
-np.save(sys.path[0] + '/title_gen_vec.npy', title_gen_vec)
+title_v = np.array(title_v)
+np.save(title_extract_w2v_vec, title_v)
 
 
+#-----------Cal Sim-----------
+title_vec = np.load(title_vec)
+title_vec = title_vec.tolist()
+title_extract_w2v_vec = np.load(title_extract_w2v_vec)
+title_extract_w2v_vec = title_extract_w2v_vec.tolist()
+
+sim = 0.0
+l = len(title_vec)
+for i in range(l):
+    s_i = cos_sim(title_vec[i], title_extract_w2v_vec[i])
+    sim += s_i
+    if i % 500 == 0:
+        print(i)
+sim /= l
+
+print(f"The similarity of title and title_extract_w2v: {sim}%")
+
+'''
 title_vec = np.load(title_vec)
 title_vec = title_vec.tolist()
 title_extract_vec = np.load(title_extract_vec)
@@ -63,7 +81,7 @@ sim /= l
 
 print(f"The similarity of title and title_extract: {sim}%")
 #The similarity of title and title_extract: 93.66692190107987%
-'''
+
 title_vec = np.load(title_vec)
 title_vec = title_vec.tolist()
 title_gen_vec = np.load(title_gen_vec)
