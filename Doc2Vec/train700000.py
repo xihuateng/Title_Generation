@@ -40,7 +40,7 @@ def get_dataset():
         result = seg.segment(text=a['content'], lower=False)
         text = text + result.sentences
         cnt += 1
-        if cnt % 1000 == 0:
+        if cnt % 500 == 0:
             print(f'{cnt} content finished.')
     print(f'{len(text)} sentences')
     return text
