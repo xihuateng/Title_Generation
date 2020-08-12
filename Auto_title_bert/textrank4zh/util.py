@@ -12,6 +12,11 @@ import math
 import networkx as nx
 import numpy as np
 import sys
+sys.path.append(sys.path[0]+'/bert4keras/')
+from bert4keras.backend import keras
+from bert4keras.models import build_transformer_model
+from bert4keras.tokenizers import Tokenizer
+from bert4keras.snippets import to_array
 
 try:
     reload(sys)
@@ -99,6 +104,30 @@ def combine(word_list, window = 2):
         for r in res:
             yield r
 
+def cos_sim(vector_a, vector_b):
+    """
+    计算两个向量之间的余弦相似度
+    :param vector_a: 向量 a 
+    :param vector_b: 向量 b
+    :return: sim
+    """
+    vector_a = np.mat(vector_a)
+    vector_b = np.mat(vector_b)
+    num = float(vector_a * vector_b.T)
+    denom = np.linalg.norm(vector_a) * np.linalg.norm(vector_b)
+    cos = num / denom
+    sim = 0.5 + 0.5 * cos
+    return sim
+
+def get_similarity_bert(strx, stry, bm ,tokenizer):
+    token_ids, segment_ids = tokenizer.encode(strx)
+    token_ids, segment_ids = to_array([token_ids], [segment_ids])
+    a = bm.predict([token_ids, segment_ids])
+    token_ids, segment_ids = tokenizer.encode(stry)
+    token_ids, segment_ids = to_array([token_ids], [segment_ids])
+    b = bm.predict([token_ids, segment_ids])
+    return cos_sim(a[0][0], b[0][0])
+
 def get_similarity(word_list1, word_list2):
     """默认的用于计算两个句子相似度的函数。
 
@@ -174,7 +203,7 @@ def sort_words(vertex_source, edge_source, window = 2, pagerank_config = {'alpha
 
     return sorted_words
 
-def sort_sentences(sentences, words, sim_func = get_similarity, pagerank_config = {'alpha': 0.85,}):
+def sort_sentences(sentences, words, bm, tz, sim_func = get_similarity_bert, pagerank_config = {'alpha': 0.85,}):
     """将句子按照关键程度从大到小排序
 
     Keyword arguments:
@@ -188,12 +217,23 @@ def sort_sentences(sentences, words, sim_func = get_similarity, pagerank_config 
     sentences_num = len(_source)        
     graph = np.zeros((sentences_num, sentences_num))
     
+    cnt = 0
     for x in xrange(sentences_num):
         for y in xrange(x, sentences_num):
-            similarity = sim_func( _source[x], _source[y] )
+            if cnt % 10 == 0:
+                print(f"{cnt} similarity finished")
+            strx = ''
+            stry = ''
+            for i in _source[x]:
+                strx += i
+            for i in _source[y]:
+                stry += i
+
+            similarity = sim_func(strx, stry, bm, tz)
             graph[x, y] = similarity
             graph[y, x] = similarity
-            
+            cnt += 1
+
     nx_graph = nx.from_numpy_matrix(graph)
     scores = nx.pagerank(nx_graph, **pagerank_config)              # this is a dict
     sorted_scores = sorted(scores.items(), key = lambda item: item[1], reverse=True)

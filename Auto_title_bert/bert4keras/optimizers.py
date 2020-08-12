@@ -3,7 +3,7 @@
 
 import numpy as np
 import tensorflow as tf
-from bert4keras.backend import keras, K, is_tf_keras
+from bert4keras.backend import keras, K #, is_tf_keras
 from bert4keras.snippets import is_string, string_matching
 from bert4keras.snippets import is_one_of, insert_arguments
 from bert4keras.backend import piecewise_linear
@@ -1016,7 +1016,7 @@ def extend_with_exponential_moving_average_v2(BaseOptimizer):
     return NewOptimizer
 
 
-if is_tf_keras:
+if True:
     extend_with_weight_decay = extend_with_weight_decay_v2
     extend_with_layer_adaptation = extend_with_layer_adaptation_v2
     extend_with_piecewise_linear_lr = extend_with_piecewise_linear_lr_v2

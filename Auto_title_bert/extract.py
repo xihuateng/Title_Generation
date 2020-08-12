@@ -1,13 +1,24 @@
 #-*- encoding:utf-8 -*-
 
 import os, sys
-sys.path.append(sys.path[0]+'/textrank4zh/')
-sys.path.append(sys.path[0]+'/textrank4zh/')
-from TextRank4Sentence import TextRank4Sentence
-#from TextRank4Keyword import TextRank4Keyword
 import json
-train_data_path = sys.path[0] + "/news2016zh_valid.json"
-title_extract_path = sys.path[0] + "/title_extract.txt"
+import numpy as np
+sys.path.append(sys.path[0]+'/textrank4zh/')
+sys.path.append(sys.path[0]+'/bert4keras/')
+from TextRank4Sentence import TextRank4Sentence
+from bert4keras.backend import keras
+from bert4keras.models import build_transformer_model
+from bert4keras.tokenizers import Tokenizer
+from bert4keras.snippets import to_array
+train_data_path = sys.path[0] + "/news2016zh_test.json"
+title_extract_path = sys.path[0] + "/title_extract_bert.txt"
+
+config_path = sys.path[0] + '/chinese_L-12_H-768_A-12/bert_config.json'
+checkpoint_path = sys.path[0] + '/chinese_L-12_H-768_A-12/bert_model.ckpt'
+dict_path = sys.path[0] + '/chinese_L-12_H-768_A-12/vocab.txt'
+
+tokenizer = Tokenizer(dict_path, do_lower_case=True)  # 建立分词器
+model = build_transformer_model(config_path, checkpoint_path)  # 建立模型，加载权重
 
 ''' test
 text = "中新网北京12月1日电(记者 张曦) 30日晚，高圆圆和赵又廷在京举行答谢宴，诸多明星现身捧场，其中包括张杰(微博)、谢娜(微博)夫妇、何炅(微博)、蔡康永(微博)、徐克、张凯丽、黄轩(微博)等。30日中午，有媒体曝光高圆圆和赵又廷现身台北桃园机场的照片，照片中两人小动作不断，尽显恩爱。事实上，夫妻俩此行是回女方老家北京举办答谢宴。群星捧场 谢娜张杰亮相当晚不到7点，两人十指紧扣率先抵达酒店。"
@@ -37,16 +48,6 @@ def get_shorter_title():
             return item['sentence']
     return "最新新闻报道"
 
-    tr4s.get_key_sentences(num=2,sentence_min_len = 5)[0]['sentence']
-
-
-'''
-for x, y in data_generator(3):
-    print("内容：")
-    print(type(x))
-    print("标题：")
-    print(y)
-'''
 
 tr4s = TextRank4Sentence()
 
@@ -54,11 +55,7 @@ title_extract = []
 
 cnt = 0
 for text, title in data_generator(10):
-    tr4s.analyze(text=text, lower=True, source = 'all_filters')
-    #tr4w.analyze(text=text, lower=True, window=2)
-    #print('标题：')
-    #print(title)
-    #print('EXTRACT:')
+    tr4s.analyze(text=text, lower=True, source = 'no_filter', m = model, tz = tokenizer)
     if len(tr4s.get_key_sentences(num=1,sentence_min_len = 5)) < 1:
         title_extract.append('最新新闻报道')
     else:

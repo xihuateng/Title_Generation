@@ -40,9 +40,9 @@ class TextRank4Sentence(object):
         
         self.key_sentences = None
         
-    def analyze(self, text, lower = False, 
+    def analyze(self, text, m, tz, lower = False,
               source = 'no_stop_words', 
-              sim_func = util.get_similarity,
+              sim_func = util.get_similarity_bert,
               pagerank_config = {'alpha': 0.85,}):
         """
         Keyword arguments:
@@ -70,7 +70,9 @@ class TextRank4Sentence(object):
         self.key_sentences = util.sort_sentences(sentences = self.sentences,
                                                  words     = _source,
                                                  sim_func  = sim_func,
-                                                 pagerank_config = pagerank_config)
+                                                 pagerank_config = pagerank_config,
+                                                 bm = m,
+                                                 tz = tz)
 
             
     def get_key_sentences(self, num = 6, sentence_min_len = 6):

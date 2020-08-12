@@ -10,6 +10,10 @@ from tensorflow.python.util import nest, tf_inspect
 from tensorflow.python.eager import tape
 from tensorflow.python.ops.custom_gradient import _graph_mode_decorator
 
+import tensorflow.keras as keras
+import tensorflow.keras.backend as K
+sys.modules['keras'] = keras
+'''
 # 判断是tf.keras还是纯keras的标记
 is_tf_keras = strtobool(os.environ.get('TF_KERAS', '0'))
 
@@ -20,7 +24,7 @@ if is_tf_keras:
 else:
     import keras
     import keras.backend as K
-
+'''
 # 判断是否启用重计算（通过时间换空间）
 do_recompute = strtobool(os.environ.get('RECOMPUTE', '0'))
 
