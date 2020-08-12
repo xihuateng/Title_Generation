@@ -63,7 +63,7 @@ for i in range(l):
 sim /= l
 
 print(f"The similarity of title and title_extract_w2v: {sim}%")
-
+#The similarity of title and title_extract_w2v: 93.69433775489152%
 '''
 title_vec = np.load(title_vec)
 title_vec = title_vec.tolist()
